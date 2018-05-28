@@ -1,0 +1,67 @@
+#! /bin/bash
+
+# Copyright (c) 2018 Cláudio Patrício
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+_SERVER="localhost"
+_USER="MY_USER"
+_SERVERDIR="~/my-project/"
+_LOCALDIR="/home/username/my-project"
+
+
+# DO NOT EDIT BELOW THIS LINE
+# DO NOT EDIT BELOW THIS LINE
+# DO NOT EDIT BELOW THIS LINE
+
+COUNT=1
+N=$#
+
+for i do
+	echo -ne "\rSending ${COUNT} of ${N} files"
+	COUNT=$(($COUNT + 1))
+	if [ -d "$i" ]; then
+		BASEFILE="$( cd "$( dirname "$i" )" && pwd )"
+		if [[ ${BASEFILE} = *"${_LOCALDIR}"* ]]; then
+			BASEFILE="${BASEFILE}/$(basename "$i")/"
+		else
+			continue
+		fi
+	elif [ -f "$i" ]; then
+		BASEFILE="$( cd "$( dirname "$i" )" && pwd )"
+		if [[ ${BASEFILE} = *"${_LOCALDIR}"* ]]; then
+			BASEFILE="${BASEFILE}/$(basename "$i")"
+		else
+			continue
+		fi
+	else
+		continue
+	fi
+	
+
+	TO=${BASEFILE#$_LOCALDIR}
+	if [ -d "$i" ]; then
+		scp -r ${BASEFILE} ${_USER}@${_SERVER}:${_SERVERDIR}${TO#?} > /dev/null 2>&1
+	elif [ -f "$i" ]; then
+		scp ${BASEFILE} ${_USER}@${_SERVER}:${_SERVERDIR}${TO#?} > /dev/null 2>&1
+	else
+		continue
+	fi
+done
+echo ""
